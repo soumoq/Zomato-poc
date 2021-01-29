@@ -32,6 +32,8 @@ android {
     }
 }
 
+apply plugin: 'kotlin-android-extensions'
+
 dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
@@ -39,6 +41,10 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.2.0'
 
     implementation 'pub.devrel:easypermissions:3.0.0' //easy permission
+
+    implementation 'com.squareup.retrofit2:retrofit:2.5.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
+    implementation 'androidx.work:work-runtime:2.2.0'
 
 
     implementation 'com.google.android.material:material:1.2.1'
