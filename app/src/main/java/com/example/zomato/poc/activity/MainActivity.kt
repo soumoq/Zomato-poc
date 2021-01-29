@@ -3,21 +3,16 @@ package com.example.zomato.poc.activity
 import android.Manifest
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.zomato.poc.R
-import com.example.zomato.poc.model.location.LocationResult
-import com.example.zomato.poc.retrofit.RestApiServiceBuilder
-import com.example.zomato.poc.retrofit.SearchService
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
 
 import com.example.zomato.poc.utility.*
-import com.example.zomato.poc.viewModel.LocationViewModel
+import com.example.zomato.poc.viewModel.SearchViewModel
 import kotlinx.android.synthetic.main.activity_main.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 
 class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
@@ -25,10 +20,9 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-
         val permissions = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
         if (EasyPermissions.hasPermissions(this, *permissions)) {
-            //getCurrentLatLon()
+            getCurrentLatLon()
             getLocBySearch()
         } else {
             EasyPermissions.requestPermissions(
@@ -36,7 +30,12 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
                 "We need permissions to access location",
                 123,
                 *permissions
-            );
+            )
+        }
+
+
+        main_search.addTextChangedListener {
+            
         }
 
     }
@@ -46,25 +45,35 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         if (gpsTracker.canGetLocation()) {
             val latitude = gpsTracker.latitude
             val longitude = gpsTracker.latitude
+
+            val searchViewModel: SearchViewModel =
+                ViewModelProvider(this).get(SearchViewModel::class.java)
+            searchViewModel.locationInfo.observe(this, Observer {
+                if (it.locationSuggestions.size > 0) {
+                    main_current_location.text = it.locationSuggestions[0].cityName
+                } else {
+
+                }
+            })
+            searchViewModel.fetchLocation(this, "", latitude, longitude)
         }
     }
 
+
     private fun getLocBySearch() {
-        val locationViewModel: LocationViewModel =
-            ViewModelProvider(this).get(LocationViewModel::class.java)
-        locationViewModel.locationInfo.observe(this, Observer {
+        val searchViewModel: SearchViewModel =
+            ViewModelProvider(this).get(SearchViewModel::class.java)
+        searchViewModel.locationInfo.observe(this, Observer {
             if (it.locationSuggestions.size > 0) {
-                Utility.toast(this, ">1")
             } else {
-                Utility.toast(this, "<1")
             }
         })
-        locationViewModel.fetchLocation(this, "Kolkata")
+        searchViewModel.fetchLocation(this, "Kolkata", null, null)
     }
 
 
     override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
-        TODO("Not yet implemented")
+
     }
 
     override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {
