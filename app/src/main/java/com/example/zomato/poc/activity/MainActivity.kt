@@ -3,6 +3,8 @@ package com.example.zomato.poc.activity
 import android.Manifest
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.example.zomato.poc.R
 import com.example.zomato.poc.model.location.LocationResult
 import com.example.zomato.poc.retrofit.RestApiServiceBuilder
@@ -11,6 +13,7 @@ import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
 
 import com.example.zomato.poc.utility.*
+import com.example.zomato.poc.viewModel.LocationViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 import retrofit2.Call
 import retrofit2.Callback
@@ -47,27 +50,16 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     }
 
     private fun getLocBySearch() {
-        var searchService = RestApiServiceBuilder.buildService(SearchService::class.java)
-        val response: Call<LocationResult> =
-            searchService.getLocation("1b3c8b37ea96785391fa55c288ac385c", "kolkata")
-        response.enqueue(object : Callback<LocationResult> {
-            override fun onResponse(
-                call: Call<LocationResult>,
-                response: Response<LocationResult>
-            ) {
-                if (response.isSuccessful) {
-                    Utility.toast(this@MainActivity, "Success")
-                } else {
-                    Utility.toast(this@MainActivity, "Failed")
-                }
+        val locationViewModel: LocationViewModel =
+            ViewModelProvider(this).get(LocationViewModel::class.java)
+        locationViewModel.locationInfo.observe(this, Observer {
+            if (it.locationSuggestions.size > 0) {
+                Utility.toast(this, ">1")
+            } else {
+                Utility.toast(this, "<1")
             }
-
-            override fun onFailure(call: Call<LocationResult>, t: Throwable) {
-                Utility.toast(this@MainActivity, "Something went wrong")
-
-            }
-
         })
+        locationViewModel.fetchLocation(this, "Kolkata")
     }
 
 
