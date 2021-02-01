@@ -3,7 +3,6 @@ package com.example.zomato.poc.model.restaurant;
 
 import java.util.List;
 
-import com.UserRating;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 

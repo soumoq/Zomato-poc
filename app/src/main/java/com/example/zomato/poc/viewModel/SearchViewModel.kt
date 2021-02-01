@@ -16,9 +16,7 @@ class SearchViewModel : ViewModel() {
     val locationInfo: MutableLiveData<LocationResult> = MutableLiveData<LocationResult>()
     val searchInfo: MutableLiveData<SearchRestaurant> = MutableLiveData<SearchRestaurant>()
 
-    fun fetchLocation(context: Context, query: String, lat: Double?, lon: Double?) {
-        getData(context, query, lat, lon)
-    }
+
 
     fun fetchSearch(context: Context, entityId: Int, entity_type: String, count: Int?) {
         val searchService = RestApiServiceBuilder.buildService(SearchService::class.java)
@@ -39,6 +37,10 @@ class SearchViewModel : ViewModel() {
             }
 
         })
+    }
+
+    fun fetchLocation(context: Context, query: String, lat: Double?, lon: Double?) {
+        getData(context, query, lat, lon)
     }
 
     private fun getData(context: Context, query: String, lat: Double?, lon: Double?) {

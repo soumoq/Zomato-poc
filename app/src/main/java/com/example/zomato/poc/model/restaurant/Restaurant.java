@@ -1,7 +1,6 @@
 
 package com.example.zomato.poc.model.restaurant;
 
-import com.Restaurant_;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 

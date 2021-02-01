@@ -2,11 +2,14 @@ package com.example.zomato.poc.activity
 
 import android.Manifest
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.widget.addTextChangedListener
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.zomato.poc.R
+import com.example.zomato.poc.model.restaurant.Restaurant
+import com.example.zomato.poc.recyclerview.RestaurantAdapter
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
 
@@ -20,23 +23,54 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+
         val permissions = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
         if (EasyPermissions.hasPermissions(this, *permissions)) {
             getCurrentLatLon()
-            getLocBySearch()
         } else {
-            EasyPermissions.requestPermissions(
-                this,
-                "We need permissions to access location",
-                123,
-                *permissions
-            )
+            EasyPermissions.requestPermissions(this, "We need permissions to access location", 123, *permissions)
         }
 
+        val restaurantAdapter = RestaurantAdapter(this)
+        main_restaurant_list.adapter = restaurantAdapter
 
-        main_search.addTextChangedListener {
-            
-        }
+        main_search_bt.setOnClickListener(View.OnClickListener {
+            if (main_search.text.toString().length > 2) {
+                val searchViewModel: SearchViewModel =
+                    ViewModelProvider(this).get(SearchViewModel::class.java)
+                searchViewModel.locationInfo.observe(this, Observer {
+                    if (it.locationSuggestions.size > 0) {
+                        Utility.toast(
+                            this,
+                            " ${it.locationSuggestions.get(0).entityId} ${
+                                it.locationSuggestions.get(
+                                    0
+                                ).entityType
+                            }"
+                        )
+
+                        searchViewModel.searchInfo.observe(this, Observer {
+                            if (it.restaurants.size > 0) {
+                                restaurantAdapter.updateData(it.restaurants as ArrayList<Restaurant>)
+                            }
+                        })
+                        searchViewModel.fetchSearch(
+                            this,
+                            it.locationSuggestions.get(0).entityId,
+                            it.locationSuggestions.get(0).entityType,
+                            5
+                        )
+
+
+                    } else {
+                        Utility.toast(this, "No result found")
+                    }
+                })
+                searchViewModel.fetchLocation(this, main_search.text.toString(), null, null)
+            }
+        })
+
 
     }
 
@@ -57,18 +91,6 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
             })
             searchViewModel.fetchLocation(this, "", latitude, longitude)
         }
-    }
-
-
-    private fun getLocBySearch() {
-        val searchViewModel: SearchViewModel =
-            ViewModelProvider(this).get(SearchViewModel::class.java)
-        searchViewModel.locationInfo.observe(this, Observer {
-            if (it.locationSuggestions.size > 0) {
-            } else {
-            }
-        })
-        searchViewModel.fetchLocation(this, "Kolkata", null, null)
     }
 
 
